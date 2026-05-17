@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&family=DynaPuff:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", serif;
+  --font-kids: "DynaPuff", cursive;
+  
+  --color-brand-red: #FF6B6B;
+  --color-brand-yellow: #FFB72B;
+  --color-brand-green: #6BCB77;
+  --color-brand-blue: #1e5abb;
+  --color-brand-blue-light: #73b3fb;
+  
+  --color-pastel-red: #FFF5F5;
+  --color-pastel-yellow: #FFFBEB;
+  --color-pastel-green: #F0FFF4;
+  --color-pastel-blue: #EBF8FF;
+  --color-pastel-purple: #F5F3FF;
+  --color-pastel-orange: #FFF7ED;
+
+  --color-sage-50: #f4f6f4;
+  --color-sage-100: #e9ede9;
+  --color-sage-200: #d3dcd3;
+  --color-sage-300: #b8c6b8;
+  --color-sage-400: #9dab9d;
+  --color-sage-500: #829282;
+  --color-sage-600: #687568;
+  --color-sage-700: #4e584e;
+  --color-sage-800: #343b34;
+  --color-sage-900: #1a1d1a;
+  
+  --color-warm-50: #FCFBFA;
+}
+
+@layer base {
+  body {
+    @apply bg-warm-50 text-slate-800 font-sans;
+  }
+}
+
+.markdown-body h1 { @apply text-2xl font-bold mb-4; }
+.markdown-body h2 { @apply text-xl font-bold mb-3 mt-6; }
+.markdown-body h3 { @apply text-lg font-bold mb-2 mt-4; }
+.markdown-body p { @apply mb-4 leading-relaxed; }
+.markdown-body ul { @apply list-disc pl-5 mb-4; }
+.markdown-body li { @apply mb-1; }

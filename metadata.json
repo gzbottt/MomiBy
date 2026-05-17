@@ -1,0 +1,14 @@
+{
+  "name": "MomiBy - Momi and Papi raise Baby",
+  "description": "Aplikasi kesehatan terpadu untuk Momi dan Papi dalam merawat bayi dengan fitur pelacakan tumbuh kembang, resep MPASI, konsultasi dokter, dan asisten AI.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "AI Health Assistant",
+    "Growth Tracking",
+    "Electronic Health Records",
+    "AI Food Analysis",
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
