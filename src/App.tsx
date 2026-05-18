@@ -10,6 +10,7 @@ import {
   Camera, MessageCircle, AlertCircle, ShoppingBag, Settings,
   AlertTriangle, Phone, Activity, Heart, Menu, X, ChevronRight,
   Plus, Search, Filter, Star, Info,
+  Store, Tag,
   ArrowLeft,
   Send,
   MoreVertical,
@@ -27,7 +28,7 @@ import {
   Doctor, FeedingEvent, Article, PharmacyItem, NutritionInfo 
 } from './types';
 import { 
-  MOCK_RECIPES, MOCK_DOCTORS, MOCK_ARTICLES, MOCK_PHARMACY 
+  MOCK_RECIPES, MOCK_DOCTORS, MOCK_ARTICLES, MOCK_PHARMACY, MOCK_MARKETPLACE 
 } from './constants';
 import { chatWithAI, generateArticle } from './lib/gemini';
 
@@ -62,7 +63,8 @@ const Navbar = ({ activePage, onPageChange }: { activePage: Page, onPageChange: 
     { p: 'home', icon: Home, label: 'Beranda', color: 'text-brand-red' },
     { p: 'chat-ai', icon: MessageCircle, label: 'Chat AI', color: 'text-brand-yellow' },
     { p: 'pharmacy', icon: ShoppingBag, label: 'Apotek', color: 'text-brand-green' },
-    { p: 'settings', icon: Settings, label: 'Pengaturan', color: 'text-brand-blue' },
+    { p: 'marketplace', icon: Store, label: 'Pasar', color: 'text-brand-blue' },
+    { p: 'settings', icon: Settings, label: 'Pengaturan', color: 'text-slate-400' },
   ];
 
   return (
@@ -117,7 +119,7 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 
 // --- Pages ---
 
-const HomePage = ({ onNavigate, profile, summary }: { onNavigate: (p: Page) => void, profile: BabyProfile, summary: any }) => (
+const HomePage = ({ onNavigate, profile, summary, onNotify }: { onNavigate: (p: Page) => void, profile: BabyProfile, summary: any, onNotify?: (m: string) => void }) => (
   <div className="space-y-10">
     <div className="flex justify-center items-center py-2">
       <img src="/assets/logo.png" className="h-20 w-auto" alt="MomiBy Logo" />
@@ -137,7 +139,10 @@ const HomePage = ({ onNavigate, profile, summary }: { onNavigate: (p: Page) => v
           <h1 className="text-2xl font-black text-slate-800 leading-tight">Momi {profile.name} 👋</h1>
         </div>
       </div>
-      <button className="p-3 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-50">
+      <button 
+        onClick={() => onNotify?.("Membuka menu utama...")}
+        className="p-3 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-50"
+      >
         <Menu className="text-brand-blue size-6" />
       </button>
     </header>
@@ -464,7 +469,7 @@ const DoctorsPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   );
 };
 
-const ArticlesPage = () => {
+const ArticlesPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   const [articles, setArticles] = useState(MOCK_ARTICLES);
   const [isGenerating, setIsGenerating] = useState(false);
   const [topic, setTopic] = useState('');
@@ -487,15 +492,19 @@ const ArticlesPage = () => {
       };
       setArticles([newArticle, ...articles]);
       setTopic('');
+      onNotify?.("Artikel AI berhasil dibuat!");
     } catch (err) {
       console.error(err);
+      onNotify?.("Gagal membuat artikel AI.");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const toggleBookmark = (id: string) => {
-    setBookmarked(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]);
+    const isNowBookmarked = !bookmarked.includes(id);
+    setBookmarked(prev => isNowBookmarked ? [...prev, id] : prev.filter(b => b !== id));
+    onNotify?.(isNowBookmarked ? "Artikel disimpan ke penanda!" : "Artikel dihapus dari penanda.");
   };
 
   const filtered = articles.filter(a => a.title.toLowerCase().includes(search.toLowerCase()));
@@ -845,7 +854,7 @@ const RecipesPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   );
 };
 
-const ChatAIPage = () => {
+const ChatAIPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'model', content: string }[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -871,6 +880,7 @@ const ChatAIPage = () => {
       setMessages(prev => [...prev, { role: 'model', content: aiResponse || 'Maaf, saya tidak bisa menjangkau data tersebut saat ini.' }]);
     } catch (err) {
       setMessages(prev => [...prev, { role: 'model', content: 'Terjadi kesalahan sistem. Silakan coba lagi.' }]);
+      onNotify?.("Gagal menghubungi AI.");
     } finally {
       setIsTyping(false);
     }
@@ -1008,9 +1018,10 @@ const EmergencyPage = ({ onNotify }: { onNotify?: (m: string) => void }) => (
   </div>
 );
 
-const SettingsPage = ({ profile, onUpdateProfile }: { 
+const SettingsPage = ({ profile, onUpdateProfile, onNotify }: { 
   profile: BabyProfile, 
-  onUpdateProfile: (p: BabyProfile) => void
+  onUpdateProfile: (p: BabyProfile) => void,
+  onNotify?: (m: string) => void
 }) => {
   const [tempProfile, setTempProfile] = useState(profile);
 
@@ -1022,6 +1033,7 @@ const SettingsPage = ({ profile, onUpdateProfile }: {
       const reader = new FileReader();
       reader.onloadend = () => {
         setTempProfile({ ...tempProfile, photo: reader.result as string });
+        onNotify?.("Foto profil berhasil diunggah!");
       };
       reader.readAsDataURL(file);
     }
@@ -1072,14 +1084,16 @@ const SettingsPage = ({ profile, onUpdateProfile }: {
             </div>
           </div>
           <button 
-            onClick={() => onUpdateProfile(tempProfile)}
+            onClick={() => {
+              onUpdateProfile(tempProfile);
+              onNotify?.("Profil Baby berhasil diperbarui!");
+            }}
             className="w-full bg-brand-green text-white py-5 rounded-3xl font-black shadow-xl shadow-brand-green/20 uppercase tracking-widest text-sm transition-all active:scale-95"
           >
             Simpan Profil
           </button>
         </div>
       </section>
-
     </div>
   );
 };
@@ -1164,7 +1178,90 @@ const PharmacyPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   );
 }
 
-const FoodAIPage = () => {
+const MarketplaceItemCard = ({ item, onAdd, icon, buttonText = 'Beli' }: { item: any, onAdd: () => void, icon?: React.ReactNode, buttonText?: string }) => (
+  <motion.div
+    whileHover={{ y: -5 }}
+    className="bg-white p-5 rounded-[3rem] border border-slate-50 flex gap-6 shadow-xl shadow-slate-200/30"
+  >
+    <div className="size-28 rounded-[2rem] overflow-hidden shadow-inner bg-slate-50 shrink-0">
+      <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+    </div>
+    <div className="flex-1 flex flex-col justify-between py-1">
+      <div>
+        <h3 className="font-black text-slate-800 text-lg leading-tight">{item.name}</h3>
+        <p className="text-[10px] text-slate-400 font-bold mt-1 line-clamp-2 uppercase tracking-tight leading-relaxed">{item.description}</p>
+      </div>
+      <div className="flex justify-between items-center mt-2">
+        <span className="font-black text-brand-blue text-lg">Rp {item.price.toLocaleString()}</span>
+        <button 
+          onClick={onAdd}
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-brand-blue transition-all flex items-center gap-2"
+        >
+          {icon || <ShoppingBag className="size-4" />}
+          {buttonText}
+        </button>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const MarketplacePage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
+  const [tab, setTab] = useState<'Products' | 'Food' | 'Used'>('Products');
+  
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Marketplace</h1>
+        <div className="relative p-3 bg-pastel-blue rounded-2xl">
+          <Store className="text-brand-blue size-6" />
+        </div>
+      </div>
+
+      <div className="flex gap-2 p-1.5 bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50">
+        {[
+          { id: 'Products', label: 'Barang', color: 'bg-brand-blue' },
+          { id: 'Food', label: 'Makanan', color: 'bg-brand-yellow' },
+          { id: 'Used', label: 'Preloved', color: 'bg-brand-green' }
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id as any)}
+            className={cn(
+              "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+              tab === t.id ? `${t.color} text-white shadow-lg` : "text-slate-400 hover:bg-slate-50"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-5">
+        {tab === 'Products' && MOCK_MARKETPLACE.products.map(item => (
+          <MarketplaceItemCard key={item.id} item={item} onAdd={() => onNotify?.(`${item.name} masuk keranjang!`)} />
+        ))}
+        {tab === 'Food' && MOCK_MARKETPLACE.food.map(item => (
+          <MarketplaceItemCard key={item.id} item={item} onAdd={() => onNotify?.(`Pesanan ${item.name} sedang diproses!`)} icon={<Clock className="size-4" />} buttonText="Pesan" />
+        ))}
+        {tab === 'Used' && MOCK_MARKETPLACE.used.map(item => (
+          <MarketplaceItemCard key={item.id} item={item} onAdd={() => onNotify?.(`Menghubungi penjual ${item.name}...`)} buttonText="Chat Penjual" />
+        ))}
+      </div>
+
+      {tab === 'Used' && (
+        <motion.button 
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onNotify?.("Membuka formulir penjualan barang...")}
+          className="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl"
+        >
+          <Tag className="size-5 text-brand-yellow" /> Jual Barang Bekas
+        </motion.button>
+      )}
+    </div>
+  );
+};
+
+const FoodAIPage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
   const [photo, setPhoto] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -1181,6 +1278,7 @@ const FoodAIPage = () => {
         setPhoto(base64);
         setIsLoading(true);
         setError(null);
+        onNotify?.("Sistem AI MomiBy sedang memproses citra makanan...");
         
         // Simulating AI Analysis with fluid timing
         setTimeout(() => {
@@ -1501,20 +1599,22 @@ export default function App() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home': return <HomePage onNavigate={setCurrentPage} profile={babyProfile} summary={dashboardSummary} />;
+      case 'home': return <HomePage onNavigate={setCurrentPage} profile={babyProfile} summary={dashboardSummary} onNotify={showNotification} />;
       case 'growth': return <GrowthPage history={growthHistory} onNotify={showNotification} />;
       case 'recipes': return <RecipesPage onNotify={showNotification} />;
       case 'doctors': return <DoctorsPage onNotify={showNotification} />;
       case 'schedule': return <FeedingPage onNotify={showNotification} />;
-      case 'articles': return <ArticlesPage />;
-      case 'chat-ai': return <ChatAIPage />;
+      case 'articles': return <ArticlesPage onNotify={showNotification} />;
+      case 'chat-ai': return <ChatAIPage onNotify={showNotification} />;
       case 'emergency': return <EmergencyPage onNotify={showNotification} />;
       case 'pharmacy': return <PharmacyPage onNotify={showNotification} />;
+      case 'marketplace': return <MarketplacePage onNotify={showNotification} />;
       case 'settings': return <SettingsPage 
          profile={babyProfile} 
          onUpdateProfile={setBabyProfile} 
+         onNotify={showNotification}
        />;
-      case 'food-ai': return <FoodAIPage />;
+      case 'food-ai': return <FoodAIPage onNotify={showNotification} />;
       default: return <div className="p-10 flex items-center justify-center font-black text-slate-300 uppercase tracking-widest">Halaman Sedang Dikembangkan 🚧</div>;
     }
   };
@@ -1528,7 +1628,7 @@ export default function App() {
               onClick={() => setCurrentPage('home')}
               className="p-3 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-50 mb-8 flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-widest"
             >
-              <ArrowLeft className="size-4 text-brand-red" /> Kemballi
+              <ArrowLeft className="size-4 text-brand-red" /> Kembali
             </button>
           )}
           {renderPage()}
