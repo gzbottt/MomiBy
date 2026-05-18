@@ -8,7 +8,8 @@ export type Page =
   | 'food-ai' 
   | 'chat-ai' 
   | 'emergency' 
-  | 'pharmacy' 
+  | 'pharmacy'
+  | 'marketplace'
   | 'settings';
 
 export interface BabyProfile {
