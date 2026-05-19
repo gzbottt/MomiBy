@@ -10,7 +10,7 @@ import {
   Camera, MessageCircle, AlertCircle, ShoppingBag, Settings,
   AlertTriangle, Phone, Activity, Heart, Menu, X, ChevronRight,
   Plus, Search, Filter, Star, Info,
-  Store, Tag,
+  Store,
   ArrowLeft,
   Send,
   MoreVertical,
@@ -1206,7 +1206,7 @@ const MarketplaceItemCard = ({ item, onAdd, icon, buttonText = 'Beli' }: { item:
 );
 
 const MarketplacePage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
-  const [tab, setTab] = useState<'Products' | 'Food' | 'Used'>('Products');
+  const [tab, setTab] = useState<'Products' | 'Food'>('Products');
   
   return (
     <div className="space-y-8">
@@ -1220,8 +1220,7 @@ const MarketplacePage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
       <div className="flex gap-2 p-1.5 bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50">
         {[
           { id: 'Products', label: 'Barang', color: 'bg-brand-blue' },
-          { id: 'Food', label: 'Makanan', color: 'bg-brand-yellow' },
-          { id: 'Used', label: 'Preloved', color: 'bg-brand-green' }
+          { id: 'Food', label: 'Makanan', color: 'bg-brand-yellow' }
         ].map((t) => (
           <button
             key={t.id}
@@ -1243,20 +1242,7 @@ const MarketplacePage = ({ onNotify }: { onNotify?: (m: string) => void }) => {
         {tab === 'Food' && MOCK_MARKETPLACE.food.map(item => (
           <MarketplaceItemCard key={item.id} item={item} onAdd={() => onNotify?.(`Pesanan ${item.name} sedang diproses!`)} icon={<Clock className="size-4" />} buttonText="Pesan" />
         ))}
-        {tab === 'Used' && MOCK_MARKETPLACE.used.map(item => (
-          <MarketplaceItemCard key={item.id} item={item} onAdd={() => onNotify?.(`Menghubungi penjual ${item.name}...`)} buttonText="Chat Penjual" />
-        ))}
       </div>
-
-      {tab === 'Used' && (
-        <motion.button 
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onNotify?.("Membuka formulir penjualan barang...")}
-          className="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl"
-        >
-          <Tag className="size-5 text-brand-yellow" /> Jual Barang Bekas
-        </motion.button>
-      )}
     </div>
   );
 };
