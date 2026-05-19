@@ -90,8 +90,5 @@ export const MOCK_MARKETPLACE = {
   food: [
     { id: 'f1', name: 'Bubur Salmon Bayi', price: 35000, image: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=300', description: 'Salmon segar dengan sayuran organik.' },
     { id: 'f2', name: 'Puree Buah Campur', price: 25000, image: 'https://images.unsplash.com/photo-1528667853886-6c7886423982?auto=format&fit=crop&q=80&w=300', description: 'Manis alami tanpa tambahan gula.' }
-  ],
-  used: [
-    { id: 'u1', name: 'Bouncer Preloved', price: 300000, image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=300', description: 'Kondisi 95% masih berfungsi sangat baik.' }
   ]
 };
